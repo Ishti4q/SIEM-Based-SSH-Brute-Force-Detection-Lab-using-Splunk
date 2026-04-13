@@ -1,0 +1,29 @@
+# 1. Basic log search
+index=* "Failed password"
+
+# 2. Extract user and IP
+index=* "Failed password"
+| rex "Failed password for (?<user>\w+) from (?<ip>\d+\.\d+\.\d+\.\d+)"
+
+# 3. Brute-force detection (threshold > 3)
+index=* "Failed password"
+| rex "Failed password for (?<user>\w+) from (?<ip>\d+\.\d+\.\d+\.\d+)"
+| stats count by user, ip
+| where count > 3
+
+# 4. Failed login trend
+index=* "Failed password"
+| timechart count
+
+# 5. Top attacker IPs
+index=* "Failed password"
+| rex "from (?<ip>\d+\.\d+\.\d+\.\d+)"
+| stats count by ip
+| sort - count
+
+# 6. Total failed logins
+index=* "Failed password"
+| stats count
+
+# 7. Raw logs
+index=* sourcetype=linux_secure
